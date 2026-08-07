@@ -12,11 +12,11 @@ def run_cli():
     # Load environment variables
     load_dotenv()
     
-    # Check if API keys are set
-    if not os.getenv("GEMINI_API_KEY") and not os.getenv("OPENAI_API_KEY"):
+    # Check if OLLAMA API key is set
+    if not os.getenv("OLLAMA_API_KEY"):
         CLIFormatter.print_error(
-            "Neither GEMINI_API_KEY nor OPENAI_API_KEY was found in your environment.\n"
-            "Please configure your .env file or export the API keys before running the CLI agent."
+            "OLLAMA_API_KEY was not found in your environment.\n"
+            "Please configure your .env file or export the API key before running the CLI agent."
         )
         return
 

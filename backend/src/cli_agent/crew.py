@@ -12,34 +12,27 @@ class CLIAgentCrew:
     def get_llm(self):
         """
         Determines and configures the LLM provider based on environment variables.
-        Supports both Gemini (Google GenAI) and OpenAI-compatible endpoints using CrewAI's LLM class.
+        Supports Ollama Cloud endpoints using CrewAI's LLM class.
         """
         from crewai import LLM
         
-        gemini_key = os.getenv("GEMINI_API_KEY")
-        openai_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("OLLAMA_API_KEY")
+        model_name = os.getenv("OLLAMA_MODEL_NAME", "gemma4:31b-cloud")
+        base_url = os.getenv("OLLAMA_API_BASE") or "https://ollama.com/v1"
 
-        if gemini_key:
-            model_name = os.getenv("GEMINI_MODEL_NAME", "gemini/gemini-1.5-flash")
-            return LLM(
-                model=model_name,
-                api_key=gemini_key
-            )
-        elif openai_key:
-            model_name = os.getenv("OPENAI_MODEL_NAME", "openai/gpt-4o")
-            base_url = os.getenv("OPENAI_API_BASE") or os.getenv("OPENAI_BASE_URL")
+        if not api_key:
+            return None
+
+        # CrewAI LLM needs a provider prefix. If not present (e.g. gemma4:31b-cloud),
+        # we prefix it with openai/ so it routes via the custom base_url using the OpenAI protocol
+        if not ("/" in model_name):
+            model_name = f"openai/{model_name}"
             
-            # CrewAI LLM needs a provider prefix. If not present (e.g. gemma4:31b-cloud),
-            # we prefix it with openai/ so it routes via the custom openai base_url
-            if not ("/" in model_name):
-                model_name = f"openai/{model_name}"
-                
-            return LLM(
-                model=model_name,
-                api_key=openai_key,
-                base_url=base_url
-            )
-        return None
+        return LLM(
+            model=model_name,
+            api_key=api_key,
+            base_url=base_url
+        )
 
     @agent
     def router_agent(self) -> Agent:
