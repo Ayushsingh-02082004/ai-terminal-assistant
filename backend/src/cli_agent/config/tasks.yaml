@@ -1,0 +1,28 @@
+routing_task:
+  description: >
+    Analyze the following user request: "{user_request}"
+    Identify the main intent and the most appropriate category to use:
+    - Shell: For running commands, installing packages, checking system status, or launching processes.
+    - File: For creating, viewing, listing, deleting, or recursively finding text/binary files less than 20MB.
+    - Code: For analyzing, editing, writing, or refactoring code files.
+    - Git: For running git operations (status, diff, add, commit, log, branch).
+    
+    Decide:
+    1. The category of the task (Shell, File, Code, Git).
+    2. The exact steps or commands to execute.
+    3. Any file paths involved.
+    
+    Structure this instruction clearly for the Task Executor.
+  expected_output: >
+    A structured plan specifying:
+    - Category: [Shell / File / Code / Git]
+    - Steps to execute
+    - File paths/commands to run
+
+execution_task:
+  description: >
+    Carry out the instructions defined by the routing_task.
+    Select and use the correct tool (shell_tool, file_tool, code_tool, or git_tool) to perform the actions.
+    Ensure you run the actual operations on the local file system or command line and capture the real outputs.
+  expected_output: >
+    The raw command outputs, modified file paths, or operation results, summarizing what was done.
