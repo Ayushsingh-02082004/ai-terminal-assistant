@@ -1,7 +1,7 @@
 import os
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from cli_agent.tools import shell_tool, file_tool, code_tool, git_tool
+from cli_agent.services import shell_tool, file_tool, code_tool, git_tool
 
 @CrewBase
 class CLIAgentCrew:
