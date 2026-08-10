@@ -41,46 +41,38 @@ class StreamRedirector(io.StringIO):
 class UserMessage(Static):
     """Widget for displaying User Prompts."""
     def __init__(self, message: str):
-        super().__init__()
-        self.message = message
-
-    def compose(self) -> ComposeResult:
-        yield Panel(
-            Text(f"User > {self.message}", style="bold cyan"),
+        panel = Panel(
+            Text(f"User > {message}", style="bold cyan"),
             border_style="cyan",
             title="[bold]Instruction[/bold]",
             title_align="left"
         )
+        super().__init__(panel)
 
 
 class RouterCard(Static):
     """Widget for displaying Router Agent decision output."""
     def __init__(self, routing_output: str):
-        super().__init__()
-        self.routing_output = routing_output
-
-    def compose(self) -> ComposeResult:
-        yield Panel(
-            Markdown(self.routing_output if self.routing_output else "Direct routing completed."),
+        panel = Panel(
+            Markdown(routing_output if routing_output else "Direct routing completed."),
             title="[bold magenta]>> Router Agent: Intent & Pathing Decision[/bold magenta]",
             title_align="left",
             border_style="magenta"
         )
+        super().__init__(panel)
 
 
 class ExecutionCard(Static):
     """Widget for displaying Executor Agent output."""
     def __init__(self, execution_output: str):
-        super().__init__()
-        self.execution_output = execution_output
-
-    def compose(self) -> ComposeResult:
-        yield Panel(
-            Markdown(self.execution_output if self.execution_output else "Task executed successfully."),
+        panel = Panel(
+            Markdown(execution_output if execution_output else "Task executed successfully."),
             title="[bold green]>> Executor Agent: Tool Execution Output[/bold green]",
             title_align="left",
             border_style="green"
         )
+        super().__init__(panel)
+
 
 
 class CLIAgentApp(App):
