@@ -107,19 +107,22 @@ class CLIAgentApp(App):
     }
 
     #input-container {
-        height: 4;
-        padding: 0 2 1 2;
+        height: 3;
+        padding: 0 1;
+        margin: 0;
     }
 
     #cmd-input {
-        border: wide $accent;
+        border: tall $accent;
+        margin: 0;
     }
 
     #debug-drawer {
-        height: 12;
+        height: 10;
+        margin: 0;
+        padding: 0;
         border-top: solid $secondary;
     }
-
     Log {
         height: 100%;
         background: $surface-darken-1;
