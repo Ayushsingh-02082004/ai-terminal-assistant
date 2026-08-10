@@ -1,5 +1,6 @@
 import sys
 import os
+import argparse
 from dotenv import load_dotenv
 
 # Add src folder to sys.path to allow absolute imports
@@ -7,6 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from cli_agent.crew import CLIAgentCrew
 from cli_agent.utils import CLIFormatter
+from cli_agent.ui import run_tui
 
 def run_cli():
     # Load environment variables
@@ -20,7 +22,16 @@ def run_cli():
         )
         return
 
-    # Print welcome screen
+    parser = argparse.ArgumentParser(description="AI Command Line Agent Interface")
+    parser.add_argument("--classic", action="store_true", help="Launch classic console input loop instead of TUI")
+    args, unknown = parser.parse_known_args()
+
+    if not args.classic:
+        # Launch modern full-screen TUI
+        run_tui()
+        return
+
+    # Print welcome screen for classic mode
     CLIFormatter.print_welcome()
     
     # Initialize the Crew
@@ -49,7 +60,6 @@ def run_cli():
             result = agent_crew.crew().kickoff(inputs={"user_request": user_request})
             
             # Extract outputs from tasks
-            # task_outputs[0] is routing_task, task_outputs[1] is execution_task
             routing_out = ""
             execution_out = ""
             
@@ -57,7 +67,6 @@ def run_cli():
                 routing_out = result.tasks_output[0].raw
                 execution_out = result.tasks_output[1].raw
             else:
-                # Fallback if task outputs are missing
                 execution_out = result.raw if hasattr(result, "raw") else str(result)
                 routing_out = "Direct routing completed."
             
@@ -67,7 +76,6 @@ def run_cli():
             CLIFormatter.print_result_summary(result)
             
         except KeyboardInterrupt:
-            # Handle Ctrl+C gracefully
             console_msg = "\nExiting CLI Agent. Goodbye!"
             print(console_msg)
             break
@@ -76,3 +84,4 @@ def run_cli():
 
 if __name__ == "__main__":
     run_cli()
+
