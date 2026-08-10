@@ -118,13 +118,14 @@ class CLIAgentApp(App):
     }
 
     #debug-drawer {
-        height: 10;
+        height: auto;
         margin: 0;
         padding: 0;
         border-top: solid $secondary;
     }
-    Log {
-        height: 100%;
+
+    #debug-log {
+        height: 10;
         background: $surface-darken-1;
     }
     """
