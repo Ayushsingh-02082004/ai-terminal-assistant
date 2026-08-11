@@ -17,10 +17,13 @@ def build():
     
     binary_name = "cli-agent"
     
+    src_dir = os.path.join(backend_dir, "src")
+    
     cmd = [
         sys.executable, "-m", "PyInstaller",
         "--onefile",
         "--name", binary_name,
+        "--paths", src_dir,
         "--add-data", data_arg,
         "--clean",
         entrypoint
