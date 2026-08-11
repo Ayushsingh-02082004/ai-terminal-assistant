@@ -25,11 +25,14 @@ class StreamRedirector(io.StringIO):
         self.log_widget = log_widget
         self.original_stream = original_stream
 
-    def write(self, s: str) -> int:
-        if s and s.strip():
+    def write(self, s) -> int:
+        if isinstance(s, bytes):
+            s = s.decode('utf-8', errors='replace')
+        s_str = str(s)
+        if s_str and s_str.strip():
             # Schedule log write safely on the UI thread
             try:
-                self.log_widget.write_line(s.rstrip())
+                self.log_widget.write_line(s_str.rstrip())
             except Exception:
                 pass
         return len(s)
@@ -41,6 +44,8 @@ class StreamRedirector(io.StringIO):
 class UserMessage(Static):
     """Widget for displaying User Prompts."""
     def __init__(self, message: str):
+        if isinstance(message, bytes):
+            message = message.decode('utf-8', errors='replace')
         panel = Panel(
             Text(f"User > {message}", style="bold cyan"),
             border_style="cyan",
@@ -53,8 +58,11 @@ class UserMessage(Static):
 class RouterCard(Static):
     """Widget for displaying Router Agent decision output."""
     def __init__(self, routing_output: str):
+        if isinstance(routing_output, bytes):
+            routing_output = routing_output.decode('utf-8', errors='replace')
+        routing_str = str(routing_output) if routing_output else "Direct routing completed."
         panel = Panel(
-            Markdown(routing_output if routing_output else "Direct routing completed."),
+            Markdown(routing_str),
             title="[bold magenta]>> Router Agent: Intent & Pathing Decision[/bold magenta]",
             title_align="left",
             border_style="magenta"
@@ -65,8 +73,11 @@ class RouterCard(Static):
 class ExecutionCard(Static):
     """Widget for displaying Executor Agent output."""
     def __init__(self, execution_output: str):
+        if isinstance(execution_output, bytes):
+            execution_output = execution_output.decode('utf-8', errors='replace')
+        execution_str = str(execution_output) if execution_output else "Task executed successfully."
         panel = Panel(
-            Markdown(execution_output if execution_output else "Task executed successfully."),
+            Markdown(execution_str),
             title="[bold green]>> Executor Agent: Tool Execution Output[/bold green]",
             title_align="left",
             border_style="green"
