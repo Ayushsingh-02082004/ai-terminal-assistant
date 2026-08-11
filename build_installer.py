@@ -19,13 +19,31 @@ def build():
     
     src_dir = os.path.join(backend_dir, "src")
     
+    # Use project virtual environment python if available to avoid packing heavy global ML packages (torch, scipy, pandas)
+    venv_python = os.path.join(root_dir, "venv", "Scripts", "python.exe") if sys.platform == "win32" else os.path.join(root_dir, "venv", "bin", "python")
+    py_exec = venv_python if os.path.exists(venv_python) else sys.executable
+    
+    excludes = [
+        "torch", "tensorflow", "scipy", "pandas", "faiss", "faiss_cpu", 
+        "onnxruntime", "pyarrow", "matplotlib", "tkinter", "lxml", 
+        "PIL", "Pillow", "pdfminer", "pypdfium2", "docx"
+    ]
+    exclude_args = []
+    for exc in excludes:
+        exclude_args.extend(["--exclude-module", exc])
+    
+    import crewai
+    crewai_translations = os.path.join(os.path.dirname(crewai.__file__), "translations")
+    crewai_data_arg = f"{crewai_translations}{sep}crewai/translations"
+    
     cmd = [
-        sys.executable, "-m", "PyInstaller",
+        py_exec, "-m", "PyInstaller",
         "--onefile",
         "--name", binary_name,
         "--paths", src_dir,
         "--add-data", data_arg,
-        "--clean",
+        "--add-data", crewai_data_arg,
+        *exclude_args,
         entrypoint
     ]
     
