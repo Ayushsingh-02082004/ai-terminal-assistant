@@ -224,11 +224,9 @@ class CLIAgentApp(App):
     @work(thread=True)
     def process_agent_task(self, user_request: str) -> dict:
         """Executes the CrewAI task in a background worker thread."""
-        if not self.agent_crew:
-            return {"routing": "", "execution": "Error: Agent system not initialized."}
-
         try:
-            result = self.agent_crew.crew().kickoff(inputs={"user_request": user_request})
+            agent_crew = CLIAgentCrew()
+            result = agent_crew.crew().kickoff(inputs={"user_request": user_request})
             
             routing_out = ""
             execution_out = ""

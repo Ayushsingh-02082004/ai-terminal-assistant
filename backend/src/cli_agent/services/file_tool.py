@@ -2,6 +2,8 @@ import os
 from typing import Literal
 from crewai.tools import tool
 
+IGNORE_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", "build", "dist", ".idea", ".vscode"}
+
 @tool("File Operations")
 def file_tool(action: str, path: str, content: str = "") -> str:
     """
@@ -20,6 +22,8 @@ def file_tool(action: str, path: str, content: str = "") -> str:
             return f"Error: File '{path}' does not exist."
         if os.path.isdir(target_path):
             return f"Error: '{path}' is a directory, not a file. Use action='list' to view directories."
+        if os.path.getsize(target_path) >= 20 * 1024 * 1024:
+            return f"Error: File '{path}' exceeds 20MB size limit and cannot be read to prevent token overload."
         try:
             with open(target_path, "r", encoding="utf-8") as f:
                 return f.read()
@@ -54,6 +58,8 @@ def file_tool(action: str, path: str, content: str = "") -> str:
             items = os.listdir(target_path)
             result = []
             for item in items:
+                if item in IGNORE_DIRS:
+                    continue
                 item_path = os.path.join(target_path, item)
                 is_dir = os.path.isdir(item_path)
                 item_type = "DIR " if is_dir else "FILE"
