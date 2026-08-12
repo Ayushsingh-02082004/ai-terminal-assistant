@@ -2,6 +2,8 @@ import os
 import py_compile
 from crewai.tools import tool
 
+IGNORE_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", "build", "dist", ".idea", ".vscode"}
+
 @tool("Code Editor and Syntax Checker")
 def code_tool(action: str, path: str, target: str = "", replacement: str = "") -> str:
     """
@@ -9,7 +11,7 @@ def code_tool(action: str, path: str, target: str = "", replacement: str = "") -
     
     Args:
         action (str): The code operation. Must be one of: 'search', 'edit', 'check_syntax'.
-        path (str): The path to the code file.
+        path (str): The path to the code file or directory.
         target (str, optional): The substring/code pattern to search for, or the exact code block to be replaced when editing. Defaults to "".
         replacement (str, optional): The new code block to replace the target block. Defaults to "".
     """
@@ -17,18 +19,35 @@ def code_tool(action: str, path: str, target: str = "", replacement: str = "") -
     target_path = os.path.abspath(path)
     
     if not os.path.exists(target_path):
-        return f"Error: Code file '{path}' does not exist."
+        return f"Error: Code path '{path}' does not exist."
         
     if action == "search":
         try:
-            with open(target_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
             matches = []
-            for idx, line in enumerate(lines):
-                if target in line:
-                    matches.append(f"Line {idx+1}: {line.strip()}")
+            if os.path.isdir(target_path):
+                for root, dirs, files in os.walk(target_path):
+                    dirs[:] = [d for d in dirs if d not in IGNORE_DIRS]
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        try:
+                            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                                for idx, line in enumerate(f):
+                                    if target in line:
+                                        rel_path = os.path.relpath(file_path, target_path)
+                                        matches.append(f"{rel_path}:L{idx+1}: {line.strip()}")
+                                        if len(matches) >= 50:
+                                            break
+                        except Exception:
+                            continue
+                        if len(matches) >= 50:
+                            break
+            else:
+                with open(target_path, "r", encoding="utf-8", errors="ignore") as f:
+                    for idx, line in enumerate(f):
+                        if target in line:
+                            matches.append(f"Line {idx+1}: {line.strip()}")
             if not matches:
-                return f"No matches found for '{target}' in file '{path}'."
+                return f"No matches found for '{target}' in '{path}'."
             return f"Found {len(matches)} match(es):\n" + "\n".join(matches)
         except Exception as e:
             return f"Error searching code: {str(e)}"

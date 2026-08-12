@@ -1,6 +1,7 @@
 import sys
 import os
 import io
+import re
 import asyncio
 from typing import Optional
 
@@ -17,6 +18,8 @@ from rich.text import Text
 
 from cli_agent.crew import CLIAgentCrew
 
+ANSI_ESCAPE = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
 
 class StreamRedirector(io.StringIO):
     """Interceptors stdout/stderr and routes them to the Textual Log widget."""
@@ -29,10 +32,11 @@ class StreamRedirector(io.StringIO):
         if isinstance(s, bytes):
             s = s.decode('utf-8', errors='replace')
         s_str = str(s)
-        if s_str and s_str.strip():
+        clean_str = ANSI_ESCAPE.sub('', s_str).strip()
+        if clean_str:
             # Schedule log write safely on the UI thread
             try:
-                self.log_widget.write_line(s_str.rstrip())
+                self.log_widget.write_line(clean_str.rstrip())
             except Exception:
                 pass
         return len(s)
@@ -148,6 +152,11 @@ class CLIAgentApp(App):
 
     def __init__(self):
         super().__init__()
+        # Explicitly disable OpenTelemetry background exporter timeouts
+        os.environ["CREWAI_TRACING_ENABLED"] = "false"
+        os.environ["OTEL_SDK_DISABLED"] = "true"
+        os.environ["LITELLM_LOG"] = "ERROR"
+        
         self.agent_crew: Optional[CLIAgentCrew] = None
         self.model_name = os.getenv("OLLAMA_MODEL_NAME", "qwen3.5:cloud")
         self.orig_stdout = sys.stdout
