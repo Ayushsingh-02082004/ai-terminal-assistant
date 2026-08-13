@@ -4,6 +4,14 @@ from crewai.tools import tool
 
 IGNORE_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", "build", "dist", ".idea", ".vscode"}
 
+def is_ignored_path(target_path: str) -> bool:
+    """Checks if target_path or any of its parent folders is in IGNORE_DIRS."""
+    parts = set(os.path.normpath(target_path).lower().split(os.sep))
+    for ignored in IGNORE_DIRS:
+        if ignored.lower() in parts:
+            return True
+    return False
+
 @tool("Code Editor and Syntax Checker")
 def code_tool(action: str, path: str, target: str = "", replacement: str = "") -> str:
     """
@@ -17,6 +25,9 @@ def code_tool(action: str, path: str, target: str = "", replacement: str = "") -
     """
     action = action.lower().strip()
     target_path = os.path.abspath(path)
+    
+    if is_ignored_path(target_path):
+        return "Skipping this dependency file or directory."
     
     if not os.path.exists(target_path):
         return f"Error: Code path '{path}' does not exist."

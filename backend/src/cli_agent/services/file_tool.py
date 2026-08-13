@@ -4,6 +4,14 @@ from crewai.tools import tool
 
 IGNORE_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", "build", "dist", ".idea", ".vscode"}
 
+def is_ignored_path(target_path: str) -> bool:
+    """Checks if target_path or any of its parent folders is in IGNORE_DIRS."""
+    parts = set(os.path.normpath(target_path).lower().split(os.sep))
+    for ignored in IGNORE_DIRS:
+        if ignored.lower() in parts:
+            return True
+    return False
+
 @tool("File Operations")
 def file_tool(action: str, path: str, content: str = "") -> str:
     """
@@ -17,15 +25,22 @@ def file_tool(action: str, path: str, content: str = "") -> str:
     action = action.lower().strip()
     target_path = os.path.abspath(path)
     
+    if is_ignored_path(target_path):
+        return "Skipping this dependency file or directory."
+    
     if action == "read":
         if not os.path.exists(target_path):
             return f"Error: File '{path}' does not exist."
         if os.path.isdir(target_path):
             return f"Error: '{path}' is a directory, not a file. Use action='list' to view directories."
-        if os.path.getsize(target_path) >= 20 * 1024 * 1024:
-            return f"Error: File '{path}' exceeds 20MB size limit and cannot be read to prevent token overload."
+        
+        max_bytes = 200 * 1024  # 200 KB limit
+        file_size = os.path.getsize(target_path)
         try:
-            with open(target_path, "r", encoding="utf-8") as f:
+            with open(target_path, "r", encoding="utf-8", errors="ignore") as f:
+                if file_size > max_bytes:
+                    read_data = f.read(max_bytes)
+                    return read_data + "\n\n[... File content truncated to first 200KB to prevent context window overload ...]"
                 return f.read()
         except Exception as e:
             return f"Error reading file: {str(e)}"

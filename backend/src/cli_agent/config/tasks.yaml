@@ -25,5 +25,6 @@ execution_task:
     Select and use the correct tool (shell_tool, file_tool, code_tool, or git_tool) to perform the actions.
     Ensure you run the actual operations on the local file system or command line and capture the real outputs.
     Do not execute the same tool with identical arguments more than once. Once tool output is received, summarize the result immediately and complete the task.
+    Never inspect, read, write, search, or append files inside dependency directories (.git, .venv, venv, node_modules, __pycache__, build, dist, .idea, .vscode). Focus exclusively on project source code files.
   expected_output: >
     The raw command outputs, modified file paths, or operation results, summarizing what was done.
