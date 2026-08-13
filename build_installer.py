@@ -32,17 +32,14 @@ def build():
     for exc in excludes:
         exclude_args.extend(["--exclude-module", exc])
     
-    import crewai
-    crewai_translations = os.path.join(os.path.dirname(crewai.__file__), "translations")
-    crewai_data_arg = f"{crewai_translations}{sep}crewai/translations"
-    
     cmd = [
         py_exec, "-m", "PyInstaller",
         "--onefile",
         "--name", binary_name,
         "--paths", src_dir,
         "--add-data", data_arg,
-        "--add-data", crewai_data_arg,
+        "--collect-all", "crewai",
+        "--collect-all", "crewai_tools",
         *exclude_args,
         entrypoint
     ]

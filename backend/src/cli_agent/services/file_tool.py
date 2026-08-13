@@ -27,6 +27,20 @@ def file_tool(action: str, path: str, content: str = "") -> str:
     
     if is_ignored_path(target_path):
         return "Skipping this dependency file or directory."
+
+    SENSITIVE_PATHS = [
+        # Linux / macOS system paths
+        "/etc/shadow", "/etc/sudoers", "/etc/passwd",
+        # Windows system paths
+        "system32/config/sam", "system32/config/system",
+        # Cross-platform SSH / Cloud credentials
+        ".ssh/id_rsa", ".ssh/id_ed25519", ".ssh/id_dsa", ".ssh/id_ecdsa",
+        ".aws/credentials", ".azure/azureprofile.json", ".config/gcloud/"
+    ]
+    target_norm = target_path.lower().replace("\\", "/")
+    for sens in SENSITIVE_PATHS:
+        if sens.lower().replace("\\", "/") in target_norm:
+            return f"Error: File access blocked by cross-platform guardrail. Access to sensitive path '{sens}' is prohibited."
     
     if action == "read":
         if not os.path.exists(target_path):

@@ -36,23 +36,25 @@ class CLIAgentCrew:
 
     @agent
     def router_agent(self) -> Agent:
+        max_iter = int(os.getenv("MAX_ROUTER_ITER", "10"))
         return Agent(
             config=self.agents_config['router_agent'],
             llm=self.get_llm(),
             verbose=True,
-            max_iter=3,
+            max_iter=max_iter,
             max_execution_time=300,
             max_retry_limit=2
         )
 
     @agent
     def executor_agent(self) -> Agent:
+        max_iter = int(os.getenv("MAX_ITER", "15"))
         return Agent(
             config=self.agents_config['executor_agent'],
             tools=[shell_tool, file_tool, code_tool, git_tool],
             llm=self.get_llm(),
             verbose=True,
-            max_iter=5,
+            max_iter=max_iter,
             max_execution_time=300,
             max_retry_limit=2
         )

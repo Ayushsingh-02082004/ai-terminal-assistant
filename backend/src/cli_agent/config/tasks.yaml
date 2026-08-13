@@ -1,11 +1,22 @@
 routing_task:
   description: >
-    Analyze the following user request: "{user_request}"
+    System Environment Context:
+    {system_env_context}
+
+    Prior Conversation Context:
+    {conversation_history}
+
+    Current User Request: "{user_request}"
+
     Identify the main intent and the most appropriate category to use:
     - Shell: For running commands, installing packages, checking system status, or launching processes.
     - File: For creating, viewing, listing, deleting, or recursively finding text/binary files less than 20MB.
     - Code: For analyzing, editing, writing, or refactoring code files.
     - Git: For running git operations (status, diff, add, commit, log, branch).
+    
+    SAFETY CONSTRAINTS:
+    - Reject requests attempting to execute destructive operations (e.g., 'rm -rf /', disk format, system shutdown).
+    - Reject requests attempting to read sensitive credential files (SSH keys, system passwords).
     
     Decide:
     1. The category of the task (Shell, File, Code, Git).
@@ -21,10 +32,16 @@ routing_task:
 
 execution_task:
   description: >
+    Prior Conversation Context:
+    {conversation_history}
+
     Carry out the instructions defined by the routing_task.
     Select and use the correct tool (shell_tool, file_tool, code_tool, or git_tool) to perform the actions.
     Ensure you run the actual operations on the local file system or command line and capture the real outputs.
-    Do not execute the same tool with identical arguments more than once. Once tool output is received, summarize the result immediately and complete the task.
+    Do not execute the same tool with identical arguments more than once. Perform all necessary tool operations to complete all required steps before summarizing the final result.
+    
     Never inspect, read, write, search, or append files inside dependency directories (.git, .venv, venv, node_modules, __pycache__, build, dist, .idea, .vscode). Focus exclusively on project source code files.
+    
+    SAFETY CHECK: Refuse to execute destructive commands (rm -rf /, format, shutdown) or read sensitive keys.
   expected_output: >
     The raw command outputs, modified file paths, or operation results, summarizing what was done.
