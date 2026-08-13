@@ -252,7 +252,12 @@ class CLIAgentApp(App):
 
             return {"routing": routing_out, "execution": execution_out}
         except Exception as e:
-            return {"routing": "Routing error encountered.", "execution": f"Error executing task: {str(e)}"}
+            err_msg = str(e)
+            if "execution timed out" in err_msg:
+                err_msg = "Task execution timed out while waiting for model generation. Consider breaking down your prompt."
+            elif "Task '" in err_msg:
+                err_msg = re.sub(r"Task '.*?' ", "", err_msg)
+            return {"routing": "Routing error encountered.", "execution": f"Error executing task: {err_msg}"}
 
     def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
         """Callback when the background worker thread completes."""

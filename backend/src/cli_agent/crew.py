@@ -41,7 +41,7 @@ class CLIAgentCrew:
             llm=self.get_llm(),
             verbose=True,
             max_iter=3,
-            max_execution_time=30,
+            max_execution_time=300,
             max_retry_limit=2
         )
 
@@ -53,7 +53,7 @@ class CLIAgentCrew:
             llm=self.get_llm(),
             verbose=True,
             max_iter=5,
-            max_execution_time=60,
+            max_execution_time=300,
             max_retry_limit=2
         )
 
