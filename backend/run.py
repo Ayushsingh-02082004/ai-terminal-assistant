@@ -1,8 +1,13 @@
 import sys
 import os
 
-# Add src directory to the path so python can locate cli_agent package
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
+# Add src directory to path for standard and PyInstaller frozen execution
+if getattr(sys, 'frozen', False):
+    bundle_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, os.path.join(bundle_dir, "src"))
+    sys.path.insert(0, bundle_dir)
+else:
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
 from cli_agent.main import run_cli
 
