@@ -24,5 +24,6 @@ execution_task:
     Carry out the instructions defined by the routing_task.
     Select and use the correct tool (shell_tool, file_tool, code_tool, or git_tool) to perform the actions.
     Ensure you run the actual operations on the local file system or command line and capture the real outputs.
+    Do not execute the same tool with identical arguments more than once. Once tool output is received, summarize the result immediately and complete the task.
   expected_output: >
     The raw command outputs, modified file paths, or operation results, summarizing what was done.

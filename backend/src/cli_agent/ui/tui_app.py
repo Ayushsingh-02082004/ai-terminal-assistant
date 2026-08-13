@@ -33,6 +33,8 @@ class StreamRedirector(io.StringIO):
             s = s.decode('utf-8', errors='replace')
         s_str = str(s)
         clean_str = ANSI_ESCAPE.sub('', s_str).strip()
+        # Remove box-drawing characters and raw trailing fragments that spill over margins
+        clean_str = re.sub(r'[─│┌┐└┘├┤┬┴┼━┃┏┓┗┛┣┫┳┻╋╭╮╯╰]', '', clean_str).strip()
         if clean_str:
             # Schedule log write safely on the UI thread
             try:
@@ -89,7 +91,6 @@ class ExecutionCard(Static):
         super().__init__(panel)
 
 
-
 class CLIAgentApp(App):
     """A modern, full-screen Terminal User Interface (TUI) for the CLI Agent."""
 
@@ -137,11 +138,13 @@ class CLIAgentApp(App):
         margin: 0;
         padding: 0;
         border-top: solid $secondary;
+        overflow-x: hidden;
     }
 
     #debug-log {
         height: 10;
         background: $surface-darken-1;
+        overflow-x: hidden;
     }
     """
 
@@ -158,7 +161,7 @@ class CLIAgentApp(App):
         os.environ["LITELLM_LOG"] = "ERROR"
         
         self.agent_crew: Optional[CLIAgentCrew] = None
-        self.model_name = os.getenv("OLLAMA_MODEL_NAME", "qwen3.5:cloud")
+        self.model_name = os.getenv("OLLAMA_MODEL_NAME", "gemma4:31b-cloud")
         self.orig_stdout = sys.stdout
         self.orig_stderr = sys.stderr
 

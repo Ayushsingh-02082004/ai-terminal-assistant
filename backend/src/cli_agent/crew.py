@@ -39,7 +39,10 @@ class CLIAgentCrew:
         return Agent(
             config=self.agents_config['router_agent'],
             llm=self.get_llm(),
-            verbose=True
+            verbose=True,
+            max_iter=3,
+            max_execution_time=30,
+            max_retry_limit=2
         )
 
     @agent
@@ -48,7 +51,10 @@ class CLIAgentCrew:
             config=self.agents_config['executor_agent'],
             tools=[shell_tool, file_tool, code_tool, git_tool],
             llm=self.get_llm(),
-            verbose=True
+            verbose=True,
+            max_iter=5,
+            max_execution_time=60,
+            max_retry_limit=2
         )
 
     @task
