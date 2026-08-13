@@ -17,6 +17,20 @@ def file_tool(action: str, path: str, content: str = "") -> str:
     action = action.lower().strip()
     target_path = os.path.abspath(path)
     
+    SENSITIVE_PATHS = [
+        # Linux / macOS system paths
+        "/etc/shadow", "/etc/sudoers", "/etc/passwd",
+        # Windows system paths
+        "system32/config/sam", "system32/config/system",
+        # Cross-platform SSH / Cloud credentials
+        ".ssh/id_rsa", ".ssh/id_ed25519", ".ssh/id_dsa", ".ssh/id_ecdsa",
+        ".aws/credentials", ".azure/azureprofile.json", ".config/gcloud/"
+    ]
+    target_norm = target_path.lower().replace("\\", "/")
+    for sens in SENSITIVE_PATHS:
+        if sens.lower().replace("\\", "/") in target_norm:
+            return f"Error: File access blocked by cross-platform guardrail. Access to sensitive path '{sens}' is prohibited."
+    
     if action == "read":
         if not os.path.exists(target_path):
             return f"Error: File '{path}' does not exist."
@@ -26,7 +40,11 @@ def file_tool(action: str, path: str, content: str = "") -> str:
             return f"Error: File '{path}' exceeds 20MB size limit and cannot be read to prevent token overload."
         try:
             with open(target_path, "r", encoding="utf-8") as f:
-                return f.read()
+                content = f.read()
+            max_read_chars = 30000
+            if len(content) > max_read_chars:
+                return content[:max_read_chars] + f"\n\n[WARNING: File read truncated from {len(content)} characters to {max_read_chars} characters to prevent LLM context limit overflow.]"
+            return content
         except Exception as e:
             return f"Error reading file: {str(e)}"
             
