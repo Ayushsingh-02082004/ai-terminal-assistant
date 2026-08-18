@@ -12,9 +12,21 @@ OS="$(uname -s)"
 ARCH="$(uname -m)"
 
 if [ "$OS" = "Darwin" ]; then
-    BINARY_NAME="cli-agent-darwin-arm64"
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "i386" ]; then
+        BINARY_NAME="cli-agent-darwin-amd64"
+    elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+        BINARY_NAME="cli-agent-darwin-arm64"
+    else
+        echo "Unsupported Mac architecture: $ARCH"
+        exit 1
+    fi
 elif [ "$OS" = "Linux" ]; then
-    BINARY_NAME="cli-agent-linux-amd64"
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        BINARY_NAME="cli-agent-linux-amd64"
+    else
+        echo "Unsupported Linux architecture: $ARCH"
+        exit 1
+    fi
 else
     echo "Unsupported Operating System: $OS"
     exit 1

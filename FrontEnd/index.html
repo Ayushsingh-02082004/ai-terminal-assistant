@@ -152,8 +152,8 @@
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
           <p style="color:var(--text-sub); font-size:0.9rem;">Or download standalone binary directly:</p>
-          <a href="https://github.com/Ayushsingh-02082004/ai-terminal-assistant/releases/download/v1.0.7/cli-agent-windows-amd64.exe" class="btn-download">
-            Download cli-agent-windows-amd64.exe (143 MB)
+          <a href="https://github.com/Ayushsingh-02082004/ai-terminal-assistant/releases/latest/download/cli-agent-windows-amd64.exe" class="btn-download">
+            Download cli-agent-windows-amd64.exe
           </a>
         </div>
       </div>
@@ -161,16 +161,21 @@
       <!-- macOS Tab Content -->
       <div class="tab-content" id="tab-mac">
         <h3>1-Line Automatic Terminal Installer (Zsh / Bash)</h3>
-        <p style="color:var(--text-muted); margin-bottom: 0.5rem;">Downloads macOS arm64 binary and adds to local PATH:</p>
+        <p style="color:var(--text-muted); margin-bottom: 0.5rem;">Auto-detects Apple Silicon vs Intel Mac, downloads binary, and adds to local PATH:</p>
         <div class="code-box">
           <code>curl -fsSL https://raw.githubusercontent.com/Ayushsingh-02082004/ai-terminal-assistant/cli-package/install.sh | bash</code>
           <button class="btn-copy" data-copy="curl -fsSL https://raw.githubusercontent.com/Ayushsingh-02082004/ai-terminal-assistant/cli-package/install.sh | bash">Copy</button>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
           <p style="color:var(--text-sub); font-size:0.9rem;">Or download standalone binary directly:</p>
-          <a href="https://github.com/Ayushsingh-02082004/ai-terminal-assistant/releases/download/v1.0.7/cli-agent-darwin-arm64" class="btn-download">
-            Download cli-agent-darwin-arm64
-          </a>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <a href="https://github.com/Ayushsingh-02082004/ai-terminal-assistant/releases/latest/download/cli-agent-darwin-arm64" class="btn-download">
+              Download for Apple Silicon (M1-M4)
+            </a>
+            <a href="https://github.com/Ayushsingh-02082004/ai-terminal-assistant/releases/latest/download/cli-agent-darwin-amd64" class="btn-download">
+              Download for Intel Mac (Older Macs)
+            </a>
+          </div>
         </div>
       </div>
 
@@ -184,7 +189,7 @@
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
           <p style="color:var(--text-sub); font-size:0.9rem;">Or download standalone binary directly:</p>
-          <a href="https://github.com/Ayushsingh-02082004/ai-terminal-assistant/releases/download/v1.0.7/cli-agent-linux-amd64" class="btn-download">
+          <a href="https://github.com/Ayushsingh-02082004/ai-terminal-assistant/releases/latest/download/cli-agent-linux-amd64" class="btn-download">
             Download cli-agent-linux-amd64
           </a>
         </div>
