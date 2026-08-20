@@ -52,13 +52,14 @@ def ensure_api_key() -> bool:
         return False
 
 def run_cli():
-    # Ensure API Key is configured interactively if missing
-    if not ensure_api_key():
-        return
-
     parser = argparse.ArgumentParser(description="AI Command Line Agent Interface")
     parser.add_argument("--classic", action="store_true", help="Launch classic console input loop instead of TUI")
+    parser.add_argument("-v", "--version", action="version", version="%(prog)s 1.0.9")
     args, unknown = parser.parse_known_args()
+
+    # Ensure API Key is configured interactively if missing before launching app
+    if not ensure_api_key():
+        return
 
     if not args.classic:
         # Launch modern full-screen TUI
