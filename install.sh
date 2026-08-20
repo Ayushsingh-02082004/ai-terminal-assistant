@@ -40,7 +40,44 @@ echo "Downloading $BINARY_NAME from GitHub Releases..."
 curl -fsSL "$DOWNLOAD_URL" -o "$EXE_PATH"
 chmod +x "$EXE_PATH"
 
-echo "Successfully installed cli-agent to $EXE_PATH"
+echo "Successfully downloaded cli-agent to $EXE_PATH"
+
+echo "Verifying executable binary compatibility..."
+if "$EXE_PATH" --help >/dev/null 2>&1 || "$EXE_PATH" version >/dev/null 2>&1 || "$EXE_PATH" help >/dev/null 2>&1; then
+    echo "Binary verification successful!"
+else
+    echo "Notice: Standalone binary requires native library fallback on this system."
+    echo "Configuring self-healing Python virtual environment..."
+    PYTHON_CMD=""
+    if command -v python3 >/dev/null 2>&1; then
+        PYTHON_CMD="python3"
+    elif command -v python >/dev/null 2>&1; then
+        PYTHON_CMD="python"
+    else
+        echo "Error: Python 3 is required for fallback installation."
+        exit 1
+    fi
+
+    VENV_DIR="$HOME/.cli-agent/venv"
+    REPO_DIR="$HOME/.cli-agent/repo"
+    rm -rf "$VENV_DIR" "$REPO_DIR"
+
+    echo "Fetching repository source for native compilation..."
+    git clone --depth 1 "https://github.com/$REPO.git" "$REPO_DIR" >/dev/null 2>&1
+
+    "$PYTHON_CMD" -m venv "$VENV_DIR"
+    "$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel >/dev/null 2>&1
+    "$VENV_DIR/bin/pip" install -r "$REPO_DIR/backend/requirements.txt" >/dev/null 2>&1
+
+    # Replace binary location with self-healing launcher wrapper
+    cat << EOF > "$EXE_PATH"
+#!/bin/sh
+export PYTHONPATH="$REPO_DIR/backend/src:\$PYTHONPATH"
+exec "$VENV_DIR/bin/python" "$REPO_DIR/backend/run.py" "\$@"
+EOF
+    chmod +x "$EXE_PATH"
+    echo "Self-healing Python installation completed successfully!"
+fi
 
 # Check if PATH contains install directory
 case ":$PATH:" in

@@ -6,3 +6,5 @@ langchain-google-genai>=1.0.0
 langchain-openai>=0.1.0
 litellm>=1.0.0
 textual>=0.40.0
+cryptography>=42.0.0,<44.0.0
+

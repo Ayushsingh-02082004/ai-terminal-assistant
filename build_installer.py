@@ -40,6 +40,8 @@ def build():
         "--add-data", data_arg,
         "--collect-all", "crewai",
         "--collect-all", "crewai_tools",
+        "--collect-all", "cryptography",
+        "--collect-all", "pyjwt",
         *exclude_args,
         entrypoint
     ]
