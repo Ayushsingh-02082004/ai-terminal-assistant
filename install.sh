@@ -66,7 +66,7 @@ else
     git clone --depth 1 "https://github.com/$REPO.git" "$REPO_DIR" >/dev/null 2>&1
 
     "$PYTHON_CMD" -m venv "$VENV_DIR"
-    "$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel >/dev/null 2>&1
+    "$VENV_DIR/bin/pip" install --upgrade pip "setuptools<70.0.0" wheel >/dev/null 2>&1
     "$VENV_DIR/bin/pip" install -r "$REPO_DIR/backend/requirements.txt" >/dev/null 2>&1
 
     # Replace binary location with self-healing launcher wrapper

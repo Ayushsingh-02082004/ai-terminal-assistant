@@ -42,6 +42,10 @@ def build():
         "--collect-all", "crewai_tools",
         "--collect-all", "cryptography",
         "--collect-all", "pyjwt",
+        "--collect-all", "textual",
+        "--collect-all", "litellm",
+        "--collect-all", "rich",
+        "--collect-all", "setuptools",
         *exclude_args,
         entrypoint
     ]

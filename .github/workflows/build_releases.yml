@@ -42,7 +42,7 @@ jobs:
 
       - name: Install Dependencies & PyInstaller
         run: |
-          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade pip "setuptools<70.0.0" wheel
           pip install -r backend/requirements.txt
           pip install pyinstaller
 
@@ -58,6 +58,23 @@ jobs:
             mv dist/cli-agent.exe dist/${{ matrix.asset_name }}
           else
             mv dist/cli-agent dist/${{ matrix.asset_name }}
+          fi
+
+      - name: Automated CI Smoke Testing
+        shell: bash
+        run: |
+          echo "=== RUNNING AUTOMATED SMOKE TESTS ==="
+          EXE_TARGET="./dist/${{ matrix.asset_name }}"
+          chmod +x "$EXE_TARGET" 2>/dev/null || true
+          
+          echo "Testing invocation: $EXE_TARGET --help"
+          "$EXE_TARGET" --help
+          
+          if "$EXE_TARGET" --help | grep -q "AI Command Line Agent Interface"; then
+            echo "✅ Smoke test PASSED: Binary initialized and printed help successfully on ${{ matrix.os }}!"
+          else
+            echo "❌ Smoke test FAILED: Unexpected output or initialization failure!"
+            exit 1
           fi
 
       - name: Upload Binary Artifact
