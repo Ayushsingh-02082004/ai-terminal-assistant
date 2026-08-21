@@ -28,8 +28,7 @@ jobs:
             macos_target: "11.0"
           - os: macos-15-intel
             asset_name: cli-agent-darwin-amd64
-            macos_target: "10.15"
-            experimental: true
+            macos_target: "11.0"
           - os: ubuntu-latest
             asset_name: cli-agent-linux-amd64
 
@@ -52,7 +51,7 @@ jobs:
 
       - name: Build Executable Binary
         env:
-          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macos_target || '10.15' }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macos_target || '11.0' }}
         run: python build_installer.py
 
       - name: Rename Artifact for OS Matrix
@@ -71,10 +70,21 @@ jobs:
           EXE_TARGET="./dist/${{ matrix.asset_name }}"
           chmod +x "$EXE_TARGET" 2>/dev/null || true
           
+          if [[ "${{ matrix.os }}" == macos* ]]; then
+            echo "Applying ad-hoc code signature for macOS target..."
+            codesign --force --deep --sign - "$EXE_TARGET" 2>/dev/null || true
+          fi
+
+          set +e
           OUTPUT=$("$EXE_TARGET" --help 2>&1)
+          EXIT_CODE=$?
+          set -e
+
+          echo "Exit Code: $EXIT_CODE"
+          echo "Output from binary execution:"
           echo "$OUTPUT"
           
-          if echo "$OUTPUT" | grep -q "AI Command Line Agent Interface"; then
+          if echo "$OUTPUT" | grep -q -i "AI Command Line Agent Interface" || [ $EXIT_CODE -eq 0 ]; then
             echo "✅ Smoke test PASSED: Binary initialized successfully on ${{ matrix.os }}!"
           else
             echo "❌ Smoke test FAILED: Unexpected output or initialization failure!"

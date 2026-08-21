@@ -49,6 +49,13 @@ def build():
         "--collect-all", "rich",
         "--collect-all", "setuptools",
         "--collect-all", "python_dotenv",
+        "--collect-all", "langchain_google_genai",
+        "--collect-all", "langchain_openai",
+        "--collect-all", "pydantic",
+        "--collect-all", "tiktoken",
+        "--collect-all", "tiktoken_ext",
+        "--hidden-import", "tiktoken_ext",
+        "--hidden-import", "tiktoken_ext.openai_public",
         *exclude_args,
         entrypoint
     ]
@@ -62,6 +69,9 @@ def build():
         ext = ".exe" if sys.platform == "win32" else ""
         out_file = os.path.join(dist_dir, f"{binary_name}{ext}")
         print(f"Standalone executable created at: {out_file}")
+        if sys.platform == "darwin" and os.path.exists(out_file):
+            print("Applying ad-hoc code signature for macOS compatibility...")
+            subprocess.run(["codesign", "--force", "--deep", "--sign", "-", out_file])
     else:
         print("\n=== BUILD FAILED ===")
         sys.exit(1)
