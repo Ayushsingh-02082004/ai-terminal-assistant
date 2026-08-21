@@ -10,37 +10,41 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ==========================================
+  # JOB 1: Build & Smoke Test Binaries (Matrix)
+  # ==========================================
   build:
-    name: Build Binary for ${{ matrix.os }}
+    name: Build Binary (${{ matrix.asset_name }})
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
+    continue-on-error: ${{ matrix.experimental || false }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
-            artifact_name: cli-agent-windows-amd64.exe
             asset_name: cli-agent-windows-amd64.exe
           - os: macos-latest
-            artifact_name: cli-agent
             asset_name: cli-agent-darwin-arm64
-          - os: macos-15-intel
-            artifact_name: cli-agent
+            macos_target: "11.0"
+          - os: macos-13
             asset_name: cli-agent-darwin-amd64
+            macos_target: "10.15"
+            experimental: true
           - os: ubuntu-latest
-            artifact_name: cli-agent
             asset_name: cli-agent-linux-amd64
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python with Pip Cache
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
 
-      - name: Install Dependencies & PyInstaller
+      - name: Install Build Dependencies
         run: |
           python -m pip install --upgrade pip "setuptools<70.0.0" wheel
           pip install -r backend/requirements.txt
@@ -48,7 +52,7 @@ jobs:
 
       - name: Build Executable Binary
         env:
-          MACOSX_DEPLOYMENT_TARGET: "10.15"
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macos_target || '10.15' }}
         run: python build_installer.py
 
       - name: Rename Artifact for OS Matrix
@@ -67,11 +71,11 @@ jobs:
           EXE_TARGET="./dist/${{ matrix.asset_name }}"
           chmod +x "$EXE_TARGET" 2>/dev/null || true
           
-          echo "Testing invocation: $EXE_TARGET --help"
-          "$EXE_TARGET" --help
+          OUTPUT=$("$EXE_TARGET" --help 2>&1)
+          echo "$OUTPUT"
           
-          if "$EXE_TARGET" --help | grep -q "AI Command Line Agent Interface"; then
-            echo "✅ Smoke test PASSED: Binary initialized and printed help successfully on ${{ matrix.os }}!"
+          if echo "$OUTPUT" | grep -q "AI Command Line Agent Interface"; then
+            echo "✅ Smoke test PASSED: Binary initialized successfully on ${{ matrix.os }}!"
           else
             echo "❌ Smoke test FAILED: Unexpected output or initialization failure!"
             exit 1
@@ -82,11 +86,30 @@ jobs:
         with:
           name: ${{ matrix.asset_name }}
           path: dist/${{ matrix.asset_name }}
+          retention-days: 7
 
-      - name: Upload Binary to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+  # ==========================================
+  # JOB 2: Create Unified GitHub Release
+  # ==========================================
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download All Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Upload Binaries to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/${{ matrix.asset_name }}
+          files: release-assets/*
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

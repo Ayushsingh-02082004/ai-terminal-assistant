@@ -23,10 +23,11 @@ class CLIAgentCrew:
         if not api_key:
             return None
 
-        # CrewAI LLM needs a provider prefix. If not present (e.g. gemma4:31b-cloud),
-        # we prefix it with openai/ so it routes via the custom base_url using the OpenAI protocol
+        # CrewAI native Ollama provider uses 'ollama/' prefix (e.g. ollama/gemma4:31b-cloud)
         if not ("/" in model_name):
-            model_name = f"openai/{model_name}"
+            model_name = f"ollama/{model_name}"
+        elif model_name.startswith("openai/"):
+            model_name = f"ollama/{model_name[7:]}"
             
         return LLM(
             model=model_name,

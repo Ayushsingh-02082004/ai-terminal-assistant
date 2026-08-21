@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-import shutil
 
 def build():
     print("=== BUILDING CLI-AGENT STANDALONE BINARY ===")
@@ -20,8 +19,11 @@ def build():
     src_dir = os.path.join(backend_dir, "src")
     
     # Use project virtual environment python if available to avoid packing heavy global ML packages (torch, scipy, pandas)
-    venv_python = os.path.join(root_dir, "venv", "Scripts", "python.exe") if sys.platform == "win32" else os.path.join(root_dir, "venv", "bin", "python")
-    py_exec = venv_python if os.path.exists(venv_python) else sys.executable
+    venv_candidates = [
+        os.path.join(root_dir, ".venv", "Scripts", "python.exe") if sys.platform == "win32" else os.path.join(root_dir, ".venv", "bin", "python"),
+        os.path.join(root_dir, "venv", "Scripts", "python.exe") if sys.platform == "win32" else os.path.join(root_dir, "venv", "bin", "python")
+    ]
+    py_exec = next((p for p in venv_candidates if os.path.exists(p)), sys.executable)
     
     excludes = [
         "torch", "tensorflow", "scipy", "pandas", "faiss", "faiss_cpu", 
@@ -46,6 +48,7 @@ def build():
         "--collect-all", "litellm",
         "--collect-all", "rich",
         "--collect-all", "setuptools",
+        "--collect-all", "python_dotenv",
         *exclude_args,
         entrypoint
     ]

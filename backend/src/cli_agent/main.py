@@ -17,7 +17,7 @@ def ensure_api_key() -> bool:
     
     if os.path.exists(global_env_path):
         load_dotenv(global_env_path)
-    load_dotenv()
+    load_dotenv(override=True)
 
     if os.getenv("OLLAMA_API_KEY"):
         return True
