@@ -52,6 +52,10 @@ def build():
         "--collect-all", "langchain_google_genai",
         "--collect-all", "langchain_openai",
         "--collect-all", "pydantic",
+        "--collect-all", "tiktoken",
+        "--collect-all", "tiktoken_ext",
+        "--hidden-import", "tiktoken_ext",
+        "--hidden-import", "tiktoken_ext.openai_public",
         *exclude_args,
         entrypoint
     ]
