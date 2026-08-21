@@ -28,8 +28,7 @@ jobs:
             macos_target: "11.0"
           - os: macos-13
             asset_name: cli-agent-darwin-amd64
-            macos_target: "10.15"
-            experimental: true
+            macos_target: "11.0"
           - os: ubuntu-latest
             asset_name: cli-agent-linux-amd64
 
@@ -52,7 +51,7 @@ jobs:
 
       - name: Build Executable Binary
         env:
-          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macos_target || '10.15' }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macos_target || '11.0' }}
         run: python build_installer.py
 
       - name: Rename Artifact for OS Matrix
